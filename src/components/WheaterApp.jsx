@@ -4,11 +4,13 @@ import sunny from "../assets/images/sunny.png";
 import cloudy from "../assets/images/cloudy.png";
 import rainy from "../assets/images/rainy.png";
 import snowy from "../assets/images/snowy.png";
+import loadingGif from "../assets/images/loading.gif";
 
-const WheatherApp = () => {
-  // GERENCIMENTO E CONTROLE DE DADOS E AÇOES
+const WeatherApp = () => {
+  // GERENCIAMENTO E CONTROLE DE DADOS E AÇÕES
   const [location, setLocation] = useState("");
   const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const getCoordinates = async (city) => {
     const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
@@ -59,8 +61,9 @@ const WheatherApp = () => {
   };
 
   const handleInputChanges = (e) => {
-    setLocation(e.target.value);
-    console.log(location);
+    const value = e.target.value;
+    setLocation(value);
+    console.log(value); // Mostra o valor correto em tempo real
   };
 
   const handleKeyDown = (e) => {
@@ -77,10 +80,11 @@ const WheatherApp = () => {
     }
 
     try {
+      setLoading(true);
+
       const coordinates = await getCoordinates(normalizedCity);
 
       if (!coordinates) {
-        console.log("City not found");
         return;
       }
 
@@ -100,6 +104,8 @@ const WheatherApp = () => {
       });
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -148,6 +154,8 @@ const WheatherApp = () => {
             />
             <i className="fa-solid fa-magnifying-glass"></i>
           </div>
+ 
+          {loading && <img className="loader" src={loadingGif} alt="Loading" />}
         </div>
 
         <div className="weather">
@@ -183,4 +191,4 @@ const WheatherApp = () => {
   );
 };
 
-export default WheatherApp;
+export default WeatherApp;
