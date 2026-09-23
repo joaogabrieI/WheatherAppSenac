@@ -1,9 +1,33 @@
 import sunny from '../assets/images/sunny.png'
 import { useState } from 'react'
+import { getWeatherInfo } from '../utils/weatherCode'
 
 const WheatherApp = () => {
   // GERENCIMENTO E CONTROLE DE DADOS E AÇOES
   const [location, setLocation] = useState('')
+  const [data, setData] = useState(null)
+
+  const getCoordinates = async(cityName) => {
+    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${cityName}&count=1&language=pt&format=json`
+
+    const response = await fetch(url)
+
+    const data = await response.json()
+
+    if(!data.results || data.results.length == 0){
+      throw new Error('Cidade não encontrada!')
+    }
+
+    const city = data.results[0]
+
+    return {
+      latitude: city.latitude,
+      longitude: city.longitude,
+      name: city.name,
+      country: city.country
+    }
+
+  }
 
   const handleInputChanges = (e) => {
     setLocation(e.target.value)
@@ -16,8 +40,26 @@ const WheatherApp = () => {
     }
   }
 
-  const search = (city) => {
-    console.log('Searching for:', city)
+  const search = async(cityName) => {
+    try {
+      // 1. Buscar as cordenadas
+      const coordinates = getCoordinates(cityName)
+
+      // 2. Pegar a latitude e longitude
+      const {latitude, longitude} = coordinates
+
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m&timezone=auto`.replace()
+
+      // 4. Buscar clima
+      const response = await fetch(url)
+
+      const data = await.response.json()
+
+      console.log('Clima: ')
+      console.log(data)
+    } catch (error) {
+      console.log(error.message)
+    }
   }
 
   // ELEMENTOS QUE SERÃO RENDERIZADOS
