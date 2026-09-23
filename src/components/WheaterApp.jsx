@@ -11,6 +11,7 @@ const WeatherApp = () => {
   const [location, setLocation] = useState("");
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const getCoordinates = async (city) => {
     const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
@@ -76,15 +77,19 @@ const WeatherApp = () => {
     const normalizedCity = city.trim();
 
     if (!normalizedCity) {
+      setError("Enter a city name");
       return;
     }
 
     try {
       setLoading(true);
+      setError("");
 
       const coordinates = await getCoordinates(normalizedCity);
 
       if (!coordinates) {
+        setError("City not found");
+        setData(null);
         return;
       }
 
@@ -102,8 +107,12 @@ const WeatherApp = () => {
         weatherCode: currentWeather.weather_code,
         time: currentWeather.time,
       });
-    } catch (error) {
-      console.error(error);
+
+      setLocation("");
+    } catch (err) {
+      console.error(err);
+      setError("Unable to load weather data");
+      setData(null);
     } finally {
       setLoading(false);
     }
@@ -154,8 +163,9 @@ const WeatherApp = () => {
             />
             <i className="fa-solid fa-magnifying-glass"></i>
           </div>
- 
+
           {loading && <img className="loader" src={loadingGif} alt="Loading" />}
+          {error && <div className="not-found">{error}</div>}
         </div>
 
         <div className="weather">
